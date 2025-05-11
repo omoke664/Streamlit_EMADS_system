@@ -22,7 +22,11 @@ if "user" not in st.session_state:
 if "next_page" not in st.session_state:
     st.session_state.next_page = None
 
-
+st.set_page_config(
+    page_title="EMADS Dashboard",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 def registration_page():
     st.title("🔒Register")
