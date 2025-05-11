@@ -83,10 +83,13 @@ def login_page():
             #Store userl info
             st.session_state.user = {
                 "username": username,
-                "role" :user["role"]
+                "role" : user["role"]
                 }
             st.success(f"✅ Welcome back, {username}!")
             st.session_state.next_page = "Dashboard"
+
+            #Force rerun so app switches to dashboard immediately
+            st.rerun()
         else:
             st.error("❌ Invalid username or password.")
             
