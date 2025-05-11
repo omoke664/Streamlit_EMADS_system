@@ -1,0 +1,16 @@
+streamlit 
+pandas 
+matplotlib 
+numpy 
+scikit-learn 
+scipy
+seaborn 
+plotly
+statsmodels
+python-dotenv
+sqlalchemy 
+pymongo
+passlib[bcrypt]
+prophet 
+cmdstanpy 
+
