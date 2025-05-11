@@ -87,31 +87,29 @@ def login_page():
 
     if submitted:
         user = users.find_one({"username": username})
-        if user:
-            if not user.get("Approved", False):
-                st.error("🚫 Your account is pending approval.")
-                return 
+       
+        if not user:
+            st.error("❌ Invalid username or password.")
+            return 
+        
 
         # ←— DISABLED CHECK 
-        if user and user.get("disabled", False):
-            st.error("🚫 Your account has been disabled. Contact an administrator.")
+        # Only block if they requested manager/admin *and* haven't been approved
+        if user.get("requested_role") in ("manager", "admin") and not user.get("approved", False):
+            st.error("🚫 Your request for elevated access is still pending admin approval.")
             return
 
-        if user and verify_password(password, user["password"]):
-            # Store user info
+        # Everyone else (residents, or pre-existing users) can log in as long as password matches:
+        if verify_password(password, user["password"]):
             st.session_state.user = {
-                "username": username,
+                "username": user["username"],
                 "role": user["role"]
             }
             st.success(f"✅ Welcome back, {username}!")
             st.session_state.next_page = "Dashboard"
-
-            # Force a rerun so we immediately switch to the dashboard
             st.rerun()
-
         else:
             st.error("❌ Invalid username or password.")
-
             
 
 def logout():
