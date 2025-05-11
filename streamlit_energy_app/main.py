@@ -27,6 +27,7 @@ if "next_page" not in st.session_state:
 st.set_page_config(
     page_title="EMADS Dashboard",
     layout="wide",
+    page_icon="assets/energy_logo.png",
     initial_sidebar_state="collapsed"
 )
 
@@ -723,6 +724,7 @@ def user_management_page():
             st.experimental_rerun()
 def about_page():
     st.title("ℹ️ About EMADS")
+    st.image("assets/energy_logo.png", width = 200)
     st.markdown(
         """
         **Energy Monitoring & Anomaly Detection System (EMADS)**  
