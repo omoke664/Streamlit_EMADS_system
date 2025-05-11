@@ -42,7 +42,7 @@ def registration_page():
         first_name = st.text_input("First Name")
         last_name = st.text_input("Last Name")
         password = st.text_input("Password", type = "password")
-        role = st.selectbox("Role", ["admin", "manager", "resident"])
+        requested = st.selectbox("Role", ["admin", "manager", "resident"])
         submitted = st.form_submit_button("Create Account")
 
 
@@ -63,10 +63,16 @@ def registration_page():
                 "last_name": last_name,
                 "created_at": pd.Timestamp.now(),
                 "password": hash_password(password),
-                "role": role
+                "role": "resident", # persitent role until approved
+                "requested_role": requested, # role requested by user
+                "approved": requested == "resident",
             })
-            st.success("✅ Account created! Please log in.")
-            st.experimental_request_rerun()
+            if requested == "resident":
+                st.success("✅ Account created!. You may now log in.")
+            else:
+                st.info("🕑 Your request for elevated access is pending admin approval.")
+
+            st.rerun()
 
 
 
@@ -81,6 +87,10 @@ def login_page():
 
     if submitted:
         user = users.find_one({"username": username})
+        if user:
+            if not user.get("Approved", False):
+                st.error("🚫 Your account is pending approval.")
+                return 
 
         # ←— DISABLED CHECK 
         if user and user.get("disabled", False):
@@ -604,6 +614,44 @@ def user_management_page():
     # Show in a table
     st.subheader("Existing Users")
     st.dataframe(df.set_index("user_id"), use_container_width=True)
+
+
+    #Pending role requests
+    st.subheader("Pending Role Requests")
+    pending = list(user_coll.find({
+        "approved": False,
+        "requested_role": {"$in": ["manager","admin"]}
+    }))
+    if pending:
+        for u in pending:
+            col1, col2, col3 = st.columns([2,2,1])
+            col1.write(f"**{u['username']}**  ({u['email']})")
+            col2.write(f"wants **{u['requested_role']}** access")
+            if col3.button("✅ Approve", key=f"app_{u['_id']}"):
+                user_coll.update_one(
+                    {"_id": u["_id"]},
+                    {"$set": {
+                        "role": u["requested_role"],
+                        "approved": True
+                    }}
+                )
+                st.success(f"{u['username']} is now {u['requested_role']}.")
+                st.experimental_rerun()
+            if col3.button("❌ Reject", key=f"rej_{u['_id']}"):
+                # either leave them as resident or delete, your choice
+                user_coll.update_one(
+                    {"_id": u["_id"]},
+                    {"$set": {
+                        "requested_role": "resident",
+                        "approved": True
+                    }}
+                )
+                st.info(f"{u['username']}'s request was rejected.")
+                st.experimental_rerun()
+    else:
+        st.write("No pending requests.")
+    st.markdown("---")
+
 
     st.markdown("---")
     st.subheader("Modify a User")
