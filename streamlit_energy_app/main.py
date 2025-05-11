@@ -32,7 +32,7 @@ st.set_page_config(
 )
 
 def registration_page():
-    st.title("Welcome To The Energy Monitoring and Anomaly Detection System.")
+    st.write("Welcome To The Energy Monitoring and Anomaly Detection System.")
     st.write("🔒Register")
     users = get_user_collection()
 
@@ -79,7 +79,7 @@ def registration_page():
 
 
 def login_page():
-    st.title("Welcome Back to the Energy Monitoring and Anomaly Detection System")
+    st.write("Welcome Back to the Energy Monitoring and Anomaly Detection System")
     st.write("🔑 Login")
     users = get_user_collection()
 
