@@ -1,7 +1,7 @@
 import streamlit as st 
 import pandas as pd
 
-from db import get_user_collection, load_energy_data, get_alerts_collection
+from db import get_user_collection, load_energy_data, get_alerts_collection, get_messages_collection
 from verify import hash_password, verify_password
 from anomaly_detection.anomaly_detector import AnomalyDetector 
 from sklearn.metrics import mean_absolute_error, mean_squared_error 
@@ -775,14 +775,75 @@ def about_page():
         """
     )
 
+def communications_page():
+    require_login()
+    user = st.session_state.user
+    role = user["role"]
+
+    # only admins and managers
+    if role not in ("admin","manager"):
+        st.error("🚫 You don’t have permission to view this page.")
+        return
+
+    st.title("💬 Communications")
+
+    messages_coll = get_messages_collection()
+
+    # 1) Send a new message
+    st.subheader("Send a Message")
+    with st.form("msg_form", clear_on_submit=True):
+        recipient = st.selectbox(
+            "Send to…",
+            ["admin","manager"] if role=="admin" else ["admin"]
+        )
+        text = st.text_area("Your message")
+        send = st.form_submit_button("📨 Send")
+    if send and text.strip():
+        messages_coll.insert_one({
+            "sender": user["username"],
+            "recipient_role": recipient,
+            "content": text.strip(),
+            "timestamp": pd.Timestamp.now(),
+            "read_by": []
+        })
+        st.success("Message sent!")
+
+    st.markdown("---")
+
+    # 2) Display incoming messages
+    st.subheader("Inbox")
+    # fetch messages addressed to this user’s role
+    inbox = list(messages_coll.find({"recipient_role": role})
+                  .sort("timestamp", -1))
+    if not inbox:
+        st.info("No messages.")
+        return
+
+    for msg in inbox:
+        ts = msg["timestamp"].to_pydatetime().strftime("%Y‑%m‑%d %H:%M")
+        is_new = user["username"] not in msg.get("read_by", [])
+        header = f"**From:** {msg['sender']}   **At:** {ts}"
+        if is_new:
+            header += "   :new:"
+
+        st.markdown(header)
+        st.write(msg["content"])
+        # “Mark as read” button
+        if is_new and st.button(f"Mark read 📖", key=str(msg["_id"])):
+            messages_coll.update_one(
+                {"_id": msg["_id"]},
+                {"$push": {"read_by": user["username"]}}
+            )
+            st.experimental_rerun()
+        st.markdown("---")
+  
 
 def main():
 
     # image logo
-    logo = Image.open("assets/energy_logo.png")
     st.sidebar.title("Navigation")
 
-    # if registration just happened, force show login
+    # if registration just happened, force show login 
     if st.session_state.next_page == "Login":
         st.session_state.next_page = None
         login_page()
@@ -800,7 +861,7 @@ def main():
         role = st.session_state.user["role"]
         pages = ["Dashboard", "Reports", "Analytics", "Recommendations", "Preferences", "About"]
         if role in ("admin", "manager"):
-            pages += ["Forecasting", "Anomalies","Alerts","User Management"]
+            pages += ["Forecasting", "Anomalies","Alerts","User Management","Communications"]
         selection = st.sidebar.radio("Go to", pages)
         st.sidebar.button("Logout", on_click = logout)
 
@@ -825,6 +886,8 @@ def main():
             about_page()
         elif selection == "User Management":
             user_management_page()
+        elif selection == "Communications":
+            communications_page()
 
     
 

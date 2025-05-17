@@ -20,6 +20,11 @@ def get_user_collection():
 def get_alerts_collection():
     return get_db()["MONGO_ALERTS_COLLECTION"]
 
+def get_messages_collection():
+    return get_db()[os.getenv("MONGO_MESSAGES_COLLECTION","messages")]
+
+
+
 
 
 
