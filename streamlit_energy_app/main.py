@@ -27,7 +27,7 @@ if "next_page" not in st.session_state:
 st.set_page_config(
     page_title="EMADS Dashboard",
     layout="wide",
-    page_icon="assets/energy_logo.png",
+    page_icon="/assets/energy_logo.png",
     initial_sidebar_state="collapsed"
 )
 
