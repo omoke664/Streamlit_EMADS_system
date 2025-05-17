@@ -1,6 +1,8 @@
 import streamlit as st 
 import pandas as pd
 
+
+from auth import cookies, get_current_user, login_user, logout_user
 from db import get_user_collection, load_energy_data, get_alerts_collection, get_messages_collection
 from verify import hash_password, verify_password
 from anomaly_detection.anomaly_detector import AnomalyDetector 
@@ -106,18 +108,20 @@ def login_page():
 
         # Everyone else (residents, or pre-existing users) can log in as long as password matches:
         if verify_password(password, user["password"]):
-            st.session_state.user = {
-                "username": user["username"],
-                "role": user["role"]
-            }
+            user_obj = {"username": user["username"], "role": user["role"]}
+            # 1) write the JWT into a cookie
+            login_user(user_obj)
+            # 2) also put it into session_state so the rest of this run picks it up
+            st.session_state.user = user_obj
             st.success(f"✅ Welcome back, {username}!")
-            st.session_state.next_page = "Dashboard"
             st.rerun()
+
         else:
             st.error("❌ Invalid username or password.")
             
 
 def logout():
+    logout_user()
     st.session_state.user = None
     st.session_state.next_page = "Login"
     st.success("✅ You have been logged out.")
@@ -868,6 +872,12 @@ def communications_page():
 
 def main():
 
+    #1) load cookies 
+    cookies.load()
+
+    # recover user from cookie
+    if "user" not in st.session_state:
+        st.session_state.user = get_current_user()
     
     st.sidebar.title("Navigation")
 
