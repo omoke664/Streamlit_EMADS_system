@@ -872,12 +872,12 @@ def communications_page():
 
 def main():
 
-    #1) load cookies 
-    cookies.load()
-
+    if not cookies.ready():
+        return 
     # recover user from cookie
     if "user" not in st.session_state:
         st.session_state.user = get_current_user()
+
     
     st.sidebar.title("Navigation")
 
