@@ -16,7 +16,18 @@ import io
 import sys, os
 sys.path.append(os.path.abspath("."))
 
-
+st.markdown(
+    """
+    <style>
+    .stForm > div > div{
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -39,6 +50,7 @@ def registration_page():
 
 
     with st.form("reg_form", clear_on_submit = True):
+        st.subheader("Create Account")
         username = st.text_input("Username")
         email = st.text_input("Email")
         first_name = st.text_input("First Name")
