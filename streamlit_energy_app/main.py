@@ -16,18 +16,7 @@ import io
 import sys, os
 sys.path.append(os.path.abspath("."))
 
-st.markdown(
-    """
-    <style>
-    .stForm > div > div {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -91,7 +80,7 @@ def registration_page():
 
 
 def login_page():
-    st.write("Welcome Back to the Energy Monitoring and Anomaly Detection System")
+    st.markdown("<center>Welcome Back to the Energy Monitoring and Anomaly Detection System.</center>", unsafe_allow_html=True)
     st.write("🔑 Login")
     users = get_user_collection()
 
