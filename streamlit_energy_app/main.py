@@ -19,10 +19,10 @@ sys.path.append(os.path.abspath("."))
 st.markdown(
     """
     <style>
-    .stForm > div > div{
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.5rem;
+    .stForm > div > div {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
     }
     </style>
     """,
