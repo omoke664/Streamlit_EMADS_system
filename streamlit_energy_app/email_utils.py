@@ -22,7 +22,15 @@ def send_email(to_addrs: str, subject: str, body: str):
 
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as smtp:
-        smtp.starttls()
-        smtp.login(SMTP_USER, SMTP_PASS)
-        smtp.send_message(msg)
+        smtp.ehlo()     #identify ourselves
+        smtp.starttls()     # upgrade to encrypted
+        smtp.ehlo()     # re-identify after TLS
+        smtp.login(SMTP_USER, SMTP_PASS) 
+
+        # Send mail explicitly
+        smtp.send_message(
+            from_addr= SMTP_USER,
+            to_addrs= [to_addrs],
+            msg = msg.as_string()
+        )
         
