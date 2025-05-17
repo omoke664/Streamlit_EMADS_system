@@ -5,6 +5,7 @@ from db import get_user_collection, load_energy_data, get_alerts_collection, get
 from verify import hash_password, verify_password
 from anomaly_detection.anomaly_detector import AnomalyDetector 
 from sklearn.metrics import mean_absolute_error, mean_squared_error 
+from email_utils import send_email
 
 import plotly.graph_objects as go
 import plotly.express as px 
@@ -779,68 +780,89 @@ def communications_page():
     require_login()
     user = st.session_state.user
     role = user["role"]
-
-    # only admins and managers
     if role not in ("admin","manager"):
         st.error("🚫 You don’t have permission to view this page.")
         return
 
     st.title("💬 Communications")
-
+    users_coll    = get_user_collection()
     messages_coll = get_messages_collection()
 
-    # 1) Send a new message
+    # Build list of possible recipients (only admins/managers except yourself)
+    candidates = users_coll.find(
+        {"role": {"$in": ["admin","manager"]}, "username": {"$ne": user["username"]}}
+    )
+    options = []
+    for u in candidates:
+        label = f"{u['first_name']} {u['last_name']} ({u['role']})"
+        options.append((label, u["username"], u["email"]))
+
     st.subheader("Send a Message")
     with st.form("msg_form", clear_on_submit=True):
-        recipient = st.selectbox(
-            "Send to…",
-            ["admin","manager"] if role=="admin" else ["admin"]
+        choice = st.selectbox(
+            "Send to…", [lbl for lbl,_,_ in options], format_func=lambda x: x
         )
-        text = st.text_area("Your message")
-        send = st.form_submit_button("📨 Send")
-    if send and text.strip():
+        content = st.text_area("Your message")
+        send    = st.form_submit_button("📨 Send")
+
+    if send and content.strip():
+        # look up username & email for the chosen label
+        recipient = next(r for r in options if r[0] == choice)
+        rec_label, rec_username, rec_email = recipient
+
+        # insert into Mongo
         messages_coll.insert_one({
             "sender": user["username"],
-            "recipient_role": recipient,
-            "content": text.strip(),
+            "recipient": rec_username,
+            "content": content.strip(),
             "timestamp": pd.Timestamp.now(),
-            "read_by": []
+            "read": False,
         })
-        st.success("Message sent!")
+        st.success(f"Message sent to {rec_label}!")
+
+        # email notification
+        subject = f"[EMADS] New message from {user['username']}"
+        body    = (
+            f"Hello {rec_label},\n\n"
+            f"You have a new message in the EMADS portal from {user['username']}.\n"
+            f"Please log in to view it.\n\n"
+            "— EMADS System"
+        )
+        try:
+            send_email(rec_email, subject, body)
+            st.info(f"📧 Notification sent to {rec_label}’s email.")
+        except Exception as e:
+            st.error(f"Failed to send email: {e}")
 
     st.markdown("---")
 
-    # 2) Display incoming messages
+    # … rest of your inbox logic, now filtering on `recipient` instead of `recipient_role` …
     st.subheader("Inbox")
-    # fetch messages addressed to this user’s role
-    inbox = list(messages_coll.find({"recipient_role": role})
-                  .sort("timestamp", -1))
+    inbox = list(messages_coll.find({"recipient": user["username"]})
+                 .sort("timestamp", -1))
     if not inbox:
         st.info("No messages.")
         return
 
     for msg in inbox:
         ts = msg["timestamp"].to_pydatetime().strftime("%Y‑%m‑%d %H:%M")
-        is_new = user["username"] not in msg.get("read_by", [])
+        new_flag = not msg.get("read", False)
         header = f"**From:** {msg['sender']}   **At:** {ts}"
-        if is_new:
+        if new_flag:
             header += "   :new:"
-
         st.markdown(header)
         st.write(msg["content"])
-        # “Mark as read” button
-        if is_new and st.button(f"Mark read 📖", key=str(msg["_id"])):
+        if new_flag and st.button("Mark read 📖", key=str(msg["_id"])):
             messages_coll.update_one(
-                {"_id": msg["_id"]},
-                {"$push": {"read_by": user["username"]}}
+                {"_id": msg["_id"]}, {"$set": {"read": True}}
             )
             st.experimental_rerun()
         st.markdown("---")
-  
+
 
 def main():
 
-    # image logo
+    
     st.sidebar.title("Navigation")
 
     # if registration just happened, force show login 

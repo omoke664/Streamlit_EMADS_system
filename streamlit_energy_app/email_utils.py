@@ -13,7 +13,7 @@ SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASS = os.getenv("SMTP_PASS")
 
 
-def send_email(to_addrs, subject, body):
+def send_email(to_addrs: str, subject: str, body: str):
     msg = EmailMessage()
     msg["From"] = SMTP_USER
     msg["To"] = ", ".join(to_addrs)
