@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = os.getenv("SMTP_PORT")
+SMTP_PORT = int(os.getenv("SMTP_PORT"))
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASS = os.getenv("SMTP_PASS")
 
@@ -16,7 +16,7 @@ SMTP_PASS = os.getenv("SMTP_PASS")
 def send_email(to_addrs: str, subject: str, body: str):
     msg = EmailMessage()
     msg["From"] = SMTP_USER
-    msg["To"] = ", ".join(to_addrs)
+    msg["To"] =  to_addrs
     msg["Subject"] = subject
     msg.set_content(body)
 
@@ -28,9 +28,5 @@ def send_email(to_addrs: str, subject: str, body: str):
         smtp.login(SMTP_USER, SMTP_PASS) 
 
         # Send mail explicitly
-        smtp.send_message(
-            from_addr= SMTP_USER,
-            to_addrs= [to_addrs],
-            msg = msg.as_string()
-        )
+        smtp.send_message(msg) # issue MAIL/RCPT/DATA
         
