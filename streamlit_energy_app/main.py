@@ -32,7 +32,7 @@ st.set_page_config(
 )
 
 def registration_page():
-    st.write("Welcome To The Energy Monitoring and Anomaly Detection System.")
+    st.markdown("<center>Welcome To The Energy Monitoring and Anomaly Detection System.</center>", unsafe_allow_html=True)
     st.write("🔒Register")
     users = get_user_collection()
 
