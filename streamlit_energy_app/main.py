@@ -845,7 +845,8 @@ def communications_page():
         return
 
     for msg in inbox:
-        ts = msg["timestamp"].to_pydatetime().strftime("%Y‑%m‑%d %H:%M")
+        raw_ts = msg["timestamp"]
+        ts = raw_ts.strftime("%Y-%m-%d %H: %M")
         new_flag = not msg.get("read", False)
         header = f"**From:** {msg['sender']}   **At:** {ts}"
         if new_flag:
