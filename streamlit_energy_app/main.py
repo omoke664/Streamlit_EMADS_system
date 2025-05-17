@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 import plotly.express as px 
 from prophet import Prophet 
 from bson import ObjectId
-
+from PIL import Image
 
 import io 
 import sys, os
@@ -777,6 +777,9 @@ def about_page():
 
 
 def main():
+
+    # image logo
+    logo = Image.open("assets/energy_logo.png")
     st.sidebar.title("Navigation")
 
     # if registration just happened, force show login
