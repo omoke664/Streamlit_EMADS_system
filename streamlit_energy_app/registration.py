@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
-from db import get_user_collection, hash_password
+from db import get_user_collection
+from verify import hash_password 
+
 
 
 

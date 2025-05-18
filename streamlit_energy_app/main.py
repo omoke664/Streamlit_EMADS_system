@@ -3,7 +3,7 @@ import pandas as pd
 
 from registration import registration_page
 from login import login_page
-from logout import logout
+from logout_app import logout
 from require_login import require_login
 from dashboard import dashboard_page 
 from anomalies import anomalies_page 
