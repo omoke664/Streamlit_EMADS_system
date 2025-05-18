@@ -13,6 +13,4 @@ pymongo
 passlib[bcrypt]
 prophet 
 cmdstanpy 
-Pillow 
-PyJWT streamlit-cookies-manager
 
