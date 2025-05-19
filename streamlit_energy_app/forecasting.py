@@ -9,7 +9,7 @@ from require_login import require_login
 from db import load_energy_data
 import math
 
-MODEL_PATH = os.path.join("models", "Prophet_model.pkl")
+MODEL_PATH = os.path.join("models", "Prophet.pkl")
 
 def forecasting_page():
     require_login()

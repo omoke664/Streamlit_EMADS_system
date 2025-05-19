@@ -6,7 +6,7 @@ import joblib
 import numpy as np
 import plotly.express as px
 
-MODEL_PATH = "models/Isolation_forest_model.joblib"
+MODEL_PATH = "models/IF_model.joblib" 
 
 def anomalies_page():
     require_login()
