@@ -4,7 +4,7 @@ import streamlit as st
 
 def about_page():
     st.title("ℹ️ About EMADS")
-    st.image("assets/energy_logo.png", width = 200)
+    
     st.markdown(
         """
         **Energy Monitoring & Anomaly Detection System (EMADS)**  
