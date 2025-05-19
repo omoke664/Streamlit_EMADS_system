@@ -6,7 +6,10 @@ import joblib
 import numpy as np
 import plotly.express as px
 
-MODEL_PATH = "models/IF_model.joblib" 
+import io 
+import sys, os
+sys.path.append(os.path.abspath("."))
+MODEL_PATH = os.path.join("models", "IF_model.joblib")
 
 def anomalies_page():
     require_login()
