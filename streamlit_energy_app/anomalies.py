@@ -6,11 +6,9 @@ import joblib
 import numpy as np
 import plotly.express as px
 
-import io 
-import sys, os
-SCRIPT_DIR = os.path.dirname(__file__)
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, os.pardir))
-MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "IF_model.joblib")
+
+
+MODEL_PATH = "IF_model.joblib"
 
 
 def anomalies_page():
