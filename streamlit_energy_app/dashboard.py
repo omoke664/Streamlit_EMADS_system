@@ -19,7 +19,7 @@ def dashboard_page():
     peak_wh = df["energy_wh"].max()
 
     #Stub anomaly rate 
-    #anomaly_rate = 0.9%
+    anomaly_rate = 0.9
 
 
     #3) Display KPI cards
