@@ -8,7 +8,7 @@ import plotly.express as px
 
 
 
-MODEL_PATH = "IF_model.joblib"
+MODEL_PATH = "models\IF_model.joblib"
 
 
 def anomalies_page():

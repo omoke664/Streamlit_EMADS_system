@@ -10,7 +10,7 @@ from db import load_energy_data
 import math
 import sys 
 
-MODEL_PATH = "Prophet.pkl"
+MODEL_PATH = "models\Prophet.pkl"
 
 def forecasting_page():
     require_login()
