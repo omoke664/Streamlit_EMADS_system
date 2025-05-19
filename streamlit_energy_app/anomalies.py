@@ -1,53 +1,94 @@
-
 import streamlit as st
 from require_login import require_login
 from db import load_energy_data
-from anomaly_detection.anomaly_detector import AnomalyDetector
+import pandas as pd
+import joblib
+import numpy as np
+import plotly.express as px
 
-
+MODEL_PATH = "models/isolation_forest_model.joblib"
 
 def anomalies_page():
     require_login()
-    st.title("📊 Anomalies")
-    # TODO: highlight anomalies, table, metrics
+    st.title("📊 Anomaly Detection")
 
-    # 1) Load energy data
+    # 1) Load data
     df = load_energy_data()
     if df.empty:
-        st.warning("No energy data available")
+        st.warning("⚠️ No energy data available.")
         return
-    
-    # 2) Run anomaly detection
-    detector = AnomalyDetector(contamination = 0.01)
-    df_flagged = detector.fit_detect(df, feature_cols =["energy_kwh"])
 
-    #3) Computer Summary metrics
-    total = len(df_flagged)
-    anomalies = df_flagged["is_anomaly"].sum()
-    rate = anomalies / total if total else 0.0
+    # 2) Load pre-trained Isolation Forest model
+    try:
+        if_model = joblib.load(MODEL_PATH)
+    except FileNotFoundError:
+        st.error(f"Cannot find model at {MODEL_PATH}")
+        return
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Records", f"{total}")
-    col2.metric("Anomalies", f"{anomalies}")
-    col3.metric("Anomaly Rate", f"{rate:.2%}")
+    # 3) Predict anomalies and scores
+    X = df[["energy_wh"]]
+    df["anomaly_flag"]  = if_model.predict(X) == -1
+    df["anomaly_score"] = if_model.decision_function(X)
 
+    # 4) Summary metrics
+    total    = len(df)
+    anomalies = df["anomaly_flag"].sum()
+    rate     = anomalies / total if total else 0.0
 
-    #4) Plot time series with anomaly markers
-    st.subheader("Energy Consumption with Anomalies")
+    # Compute longest run of consecutive anomalies
+    runs = (df["anomaly_flag"] != df["anomaly_flag"].shift()).cumsum()
+    cons_counts = df.groupby(runs)["anomaly_flag"].sum()
+    longest_run = int(cons_counts.max()) if not cons_counts.empty else 0
 
-    # Mark normal vs. anomaly values
-    df_flagged["Anomaly"] = df_flagged["energy_kwh"].where(df_flagged["is_anomaly"], None)
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Total Records", f"{total}")
+    c2.metric("Total Anomalies", f"{anomalies}")
+    c3.metric("Anomaly Rate", f"{rate:.2%}")
+    c4.metric("Longest Consecutive Anomalies", f"{longest_run}")
 
-    # Create a multi-series DataFrame for the chart
-    chart_df = df_flagged.set_index("timestamp")[["energy_kwh", "Anomaly"]]
-
-    st.line_chart(chart_df, use_container_width=True)
-
-    st.subheader("Anomaly Details")
-    st.dataframe(
-        df_flagged[df_flagged["is_anomaly"]]
-        [["timestamp", "energy_kwh", "anomaly_score"]]
-        .sort_values("timestamp")
-        .reset_index(drop = True),
-        use_container_width=True,
+    # 5) Time-series plot with anomalies highlighted
+    st.subheader("Energy Consumption with Anomalies Highlighted")
+    fig = px.line(df, x="timestamp", y="energy_wh", title="Energy Over Time")
+    fig.add_scatter(
+        x=df.loc[df["anomaly_flag"], "timestamp"],
+        y=df.loc[df["anomaly_flag"], "energy_wh"],
+        mode="markers",
+        marker=dict(color="red", size=6),
+        name="Anomaly"
     )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 6) Detailed table
+    st.subheader("All Records with Anomaly Flag & Score")
+    display_df = df.copy()
+    display_df["Status"] = np.where(display_df["anomaly_flag"], "Anomaly", "Normal")
+    display_df = display_df[["timestamp", "energy_wh", "Status", "anomaly_score"]]
+    display_df = display_df.sort_values("timestamp").reset_index(drop=True)
+    st.dataframe(display_df, use_container_width=True)
+    st.download_button(
+        "Download Detailed Anomalies CSV",
+        display_df.to_csv(index=False),
+        "anomalies_detailed.csv",
+        "text/csv"
+    )
+
+    # 7) Model description
+    st.markdown("---")
+    st.subheader("How the Isolation Forest Model Works")
+    params = if_model.get_params()
+    st.markdown(f"""
+- **Model parameters**  
+  - `n_estimators`: {params['n_estimators']}  
+  - `contamination`: {params['contamination']}  
+  - `max_samples`: {params.get('max_samples', 'auto')}  
+  - `random_state`: {params['random_state']}  
+
+Isolation Forest isolates anomalies by recursively partitioning the data. Since anomalies are few and different, they require fewer splits to isolate, resulting in lower “anomaly scores.” Points with negative predictions (`-1`) are flagged as anomalies.
+
+**Summary Metrics**  
+- Total points analyzed: **{total}**  
+- Points flagged anomalous: **{anomalies}**  
+- Anomaly rate: **{rate:.2%}**  
+- Longest consecutive anomaly run: **{longest_run}**
+    """)
+

@@ -33,7 +33,7 @@ def get_messages_collection():
 def load_energy_data():
     """Load energy data from MongoDB and return as a DataFrame."""
     col = get_db()[os.getenv("MONGO_ENERGY_COLLECTION")]
-    cursor = col.find({}, {"_id":0, "timestamp": 1, "energy_kwh": 1})
+    cursor = col.find({}, {"_id":0, "timestamp": 1, "energy_wh": 1})
     df = pd.DataFrame(list(cursor))
     if not df.empty:
         df["timestamp"] = pd.to_datetime(df["timestamp"])

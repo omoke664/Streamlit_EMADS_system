@@ -15,7 +15,7 @@ def recommendations_page():
         return
 
     # Daily totals
-    daily = df.set_index("timestamp").resample("D")["energy_kwh"].sum()
+    daily = df.set_index("timestamp").resample("D")["energy_wh"].sum()
 
     # Compute week-over-week change
     week_ago = daily.shift(7)
@@ -54,8 +54,8 @@ def recommendations_page():
     # 3) Night‐time usage
     # average usage 10pm–6am vs. daytime
     df["hour"] = df["timestamp"].dt.hour
-    night = df[(df["hour"] >= 22) | (df["hour"] < 6)]["energy_kwh"].mean()
-    day   = df[(df["hour"] >= 6) & (df["hour"] < 22)]["energy_kwh"].mean()
+    night = df[(df["hour"] >= 22) | (df["hour"] < 6)]["energy_wh"].mean()
+    day   = df[(df["hour"] >= 6) & (df["hour"] < 22)]["energy_wh"].mean()
     if night > day * 0.5:
         tips.append({
             "severity": "Medium",

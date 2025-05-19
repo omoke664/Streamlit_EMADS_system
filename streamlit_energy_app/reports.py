@@ -41,7 +41,7 @@ def reports_page():
     # Also include anomalies
     st.subheader("Download Anomaly Report")
     detector = AnomalyDetector(contamination=0.01)
-    df_flagged = detector.fit_detect(df, feature_cols=["energy_kwh"])
+    df_flagged = detector.fit_detect(df, feature_cols=["energy_wh"])
     anomalies = df_flagged[df_flagged["is_anomaly"]]
 
     if anomalies.empty:

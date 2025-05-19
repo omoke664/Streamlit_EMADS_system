@@ -13,4 +13,6 @@ pymongo
 passlib[bcrypt]
 prophet 
 cmdstanpy 
+itsdangerous 
+
 

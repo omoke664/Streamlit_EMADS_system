@@ -4,7 +4,11 @@ from db import get_user_collection
 from verify import verify_password
 
 def login_page():
-    st.markdown("<center>Welcome Back to the Energy Monitoring and Anomaly Detection System.</center>", unsafe_allow_html=True)
+   
+
+    
+    
+    st.markdown("<center>Welcome Back to EMADS.</center>", unsafe_allow_html=True)
     st.write("🔑 Login")
     users = get_user_collection()
 

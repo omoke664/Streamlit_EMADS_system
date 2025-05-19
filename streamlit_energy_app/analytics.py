@@ -34,21 +34,21 @@ def analytics_page():
     freq_map = {"Daily": "D", "Weekly": "W", "Monthly": "M"}
     df_agg = (
         df.set_index("timestamp")
-          .resample(freq_map[agg_level])["energy_kwh"]
+          .resample(freq_map[agg_level])["energy_wh"]
           .sum()
           .reset_index()
     )
     df_agg["timestamp"] = df_agg["timestamp"].dt.date
-    st.bar_chart(df_agg.rename(columns={"timestamp": "index"}).set_index("index")["energy_kwh"],
+    st.bar_chart(df_agg.rename(columns={"timestamp": "index"}).set_index("index")["energy_wh"],
                  use_container_width=True)
 
     # 3) Distribution Plots
     st.subheader("Consumption Distribution")
-    fig_hist = px.histogram(df, x="energy_kwh", nbins=30,
+    fig_hist = px.histogram(df, x="energy_wh", nbins=30,
                             title="Histogram of Energy Consumption")
     st.plotly_chart(fig_hist, use_container_width=True)
 
-    fig_box = px.box(df, y="energy_kwh", points="all",
+    fig_box = px.box(df, y="energy_wh", points="all",
                      title="Boxplot of Energy Consumption")
     st.plotly_chart(fig_box, use_container_width=True)
 
@@ -57,7 +57,7 @@ def analytics_page():
     df["hour"] = df["timestamp"].dt.hour
     df["weekday"] = df["timestamp"].dt.day_name()
     hourly = (
-        df.groupby(["weekday", "hour"])["energy_kwh"]
+        df.groupby(["weekday", "hour"])["energy_wh"]
           .mean()
           .reindex(index=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], level=0)
           .reset_index()
@@ -68,7 +68,7 @@ def analytics_page():
         df_day = hourly[hourly["weekday"] == day]
         fig.add_trace(go.Scatter(
             x=df_day["hour"],
-            y=df_day["energy_kwh"],
+            y=df_day["energy_wh"],
             mode="lines+markers",
             name=day
         ))
