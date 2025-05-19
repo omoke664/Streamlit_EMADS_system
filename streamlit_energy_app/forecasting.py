@@ -9,11 +9,12 @@ from require_login import require_login
 from db import load_energy_data
 import math
 
-import io 
-import sys, os
-sys.path.append(os.path.abspath("."))
 
-MODEL_PATH = os.path.join("models", "Prophet.pkl")
+
+
+SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, os.pardir))
+MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "Prophet.pkl")
 
 def forecasting_page():
     require_login()

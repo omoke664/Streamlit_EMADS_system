@@ -8,8 +8,10 @@ import plotly.express as px
 
 import io 
 import sys, os
-sys.path.append(os.path.abspath("."))
-MODEL_PATH = os.path.join("models", "IF_model.joblib")
+SCRIPT_DIR = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, os.pardir))
+MODEL_PATH = os.path.join(PROJECT_ROOT, "models", "IF_model.joblib")
+
 
 def anomalies_page():
     require_login()

@@ -1,7 +1,6 @@
 import streamlit as st 
 from require_login import require_login
 from db import load_energy_data
-
 def dashboard_page():
     require_login()
 
@@ -20,7 +19,8 @@ def dashboard_page():
     peak_wh = df["energy_wh"].max()
 
     #Stub anomaly rate 
-    anomaly_rate = 0.0 
+    #anomaly_rate = 0.9%
+
 
     #3) Display KPI cards
     col1, col2, col3, col4 = st.columns(4)
