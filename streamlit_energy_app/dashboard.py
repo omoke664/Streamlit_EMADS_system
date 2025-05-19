@@ -53,7 +53,7 @@ def dashboard_page():
     # 8) Average for each day of the week
     st.subheader("Average Energy Consumption by Day of the Week")
     df["day_of_week"] = df["timestamp"].dt.day_name()
-    avg_by_day = df.groupby("day_of_week")["energy_wh"].mean().reindex(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+    avg_by_day = df.groupby("day_of_week")["energy_wh"].mean().reindex(["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",])
     st.bar_chart(avg_by_day, use_container_width = True)
 
 

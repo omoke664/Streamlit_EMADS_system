@@ -1,4 +1,3 @@
-# forecasting.py
 import os
 import joblib
 import streamlit as st
@@ -8,9 +7,12 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from require_login import require_login
 from db import load_energy_data
 import math
-import sys 
 
-MODEL_PATH = "models/Prophet.pkl"
+#  Locating script’s directory (…/streamlit_energy_app)
+SCRIPT_DIR = os.path.dirname(__file__)
+
+# Build MODEL_PATH by joining SCRIPT_DIR → models/Prophet.pkl
+MODEL_PATH = os.path.join(SCRIPT_DIR, "models", "Prophet.pkl")
 
 def forecasting_page():
     require_login()
@@ -24,15 +26,17 @@ def forecasting_page():
 
     # 2) Aggregate to daily sums
     df_daily = (
-        df.set_index("timestamp")   # make ts the index
-          .resample("D")            # calendar days
-          .sum()                    # sum energy_wh per day
-          .reset_index()            # back to column
+        df.set_index("timestamp")
+          .resample("D")
+          .sum()
+          .reset_index()
     )
     data = df_daily.rename(columns={"timestamp": "ds", "energy_wh": "y"})
 
     # 3) Choose your forecast horizon
     horizon = st.slider("Forecast Horizon (days)", 1, 30, 7)
+
+    
 
     # 4) Load your saved Prophet model
     if not os.path.exists(MODEL_PATH):
@@ -46,47 +50,22 @@ def forecasting_page():
 
     # 6) Plot with Plotly
     fig = go.Figure()
-    # historical
-    fig.add_trace(go.Scatter(
-        x=data["ds"], y=data["y"],
-        mode="lines", name="Historical"
-    ))
-    # forecast
-    fig.add_trace(go.Scatter(
-        x=forecast["ds"], y=forecast["yhat"],
-        mode="lines", name="Forecast"
-    ))
-    # uncertainty band
-    fig.add_trace(go.Scatter(
-        x=forecast["ds"], y=forecast["yhat_upper"],
-        mode="lines", line=dict(width=0), showlegend=False
-    ))
-    fig.add_trace(go.Scatter(
-        x=forecast["ds"], y=forecast["yhat_lower"],
-        mode="lines", fill="tonexty",
-        fillcolor="rgba(0,100,80,0.2)",
-        line=dict(width=0), showlegend=False
-    ))
-
-    fig.update_layout(
-        title="Daily Energy Forecast",
-        xaxis_title="Date", yaxis_title="Energy (kWh)",
-        height=500
-    )
+    fig.add_trace(go.Scatter(x=data["ds"], y=data["y"], mode="lines", name="Historical"))
+    fig.add_trace(go.Scatter(x=forecast["ds"], y=forecast["yhat"], mode="lines", name="Forecast"))
+    fig.add_trace(go.Scatter(x=forecast["ds"], y=forecast["yhat_upper"], mode="lines", line=dict(width=0), showlegend=False))
+    fig.add_trace(go.Scatter(x=forecast["ds"], y=forecast["yhat_lower"], mode="lines", fill="tonexty", fillcolor="rgba(0,100,80,0.2)", line=dict(width=0), showlegend=False))
+    fig.update_layout(title="Daily Energy Forecast", xaxis_title="Date", yaxis_title="Energy (kWh)", height=500)
     st.plotly_chart(fig, use_container_width=True)
 
-    # 7) Compute accuracy against the last `horizon` days
-    #   align historical test window
+    # 7) Compute accuracy
     test = data.iloc[-horizon:].set_index("ds")["y"]
-    #   align forecast
     fcst = forecast.set_index("ds")["yhat"].reindex(test.index)
     y_true, y_pred = test.values, fcst.values
-
     mae  = mean_absolute_error(y_true, y_pred)
-    mse = mean_squared_error(y_true, y_pred)
+    mse  = mean_squared_error(y_true, y_pred)
     rmse = math.sqrt(mse)
 
-    st.subheader("Forecast Accuracy (last {} days)".format(horizon))
+    st.subheader(f"Forecast Accuracy (last {horizon} days)")
     c1, c2 = st.columns(2)
     c1.metric("MAE", f"{mae:,.2f}")
     c2.metric("RMSE", f"{rmse:,.2f}")
@@ -94,10 +73,5 @@ def forecasting_page():
     # 8) Show the forecast table
     with st.expander("See forecasted values"):
         disp = forecast[["ds","yhat","yhat_lower","yhat_upper"]].tail(horizon)
-        disp = disp.rename(columns={
-            "ds":   "Date",
-            "yhat": "Forecast",
-            "yhat_lower": "Lower",
-            "yhat_upper": "Upper"
-        })
+        disp = disp.rename(columns={"ds": "Date", "yhat": "Forecast", "yhat_lower": "Lower", "yhat_upper": "Upper"})
         st.dataframe(disp, use_container_width=True)

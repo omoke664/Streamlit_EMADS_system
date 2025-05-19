@@ -5,10 +5,13 @@ import pandas as pd
 import joblib
 import numpy as np
 import plotly.express as px
+import os
 
+# 1) Locate this script’s directory
+SCRIPT_DIR = os.path.dirname(__file__)
 
-
-MODEL_PATH = "models/IF_model.joblib"
+#Build MODEL_PATH by joining SCRIPT_DIR → models/IF_model.joblib
+MODEL_PATH = os.path.join(SCRIPT_DIR, "models", "IF_model.joblib")
 
 
 def anomalies_page():
@@ -20,6 +23,9 @@ def anomalies_page():
     if df.empty:
         st.warning("⚠️ No energy data available.")
         return
+
+    
+    
 
     # 2) Load pre-trained Isolation Forest model
     try:
@@ -34,12 +40,12 @@ def anomalies_page():
     df["anomaly_score"] = if_model.decision_function(X)
 
     # 4) Summary metrics
-    total    = len(df)
+    total     = len(df)
     anomalies = df["anomaly_flag"].sum()
-    rate     = anomalies / total if total else 0.0
+    rate      = anomalies / total if total else 0.0
 
     # Compute longest run of consecutive anomalies
-    runs = (df["anomaly_flag"] != df["anomaly_flag"].shift()).cumsum()
+    runs        = (df["anomaly_flag"] != df["anomaly_flag"].shift()).cumsum()
     cons_counts = df.groupby(runs)["anomaly_flag"].sum()
     longest_run = int(cons_counts.max()) if not cons_counts.empty else 0
 
@@ -94,4 +100,3 @@ Isolation Forest isolates anomalies by recursively partitioning the data. Since 
 - Anomaly rate: **{rate:.2%}**  
 - Longest consecutive anomaly run: **{longest_run}**
     """)
-
