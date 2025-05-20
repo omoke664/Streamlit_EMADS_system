@@ -58,7 +58,8 @@ def communications_page():
             f"Hello {rec_label},\n\n"
             f"You have a new message in the EMADS portal from {user['username']}.\n"
             f"Please log in to view it.\n\n"
-            "— EMADS System"
+            "— EMADS System" \
+            "https://emadsenergy.streamlit.app/"
         )
         try:
             send_email(rec_email, subject, body)

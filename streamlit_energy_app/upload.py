@@ -10,7 +10,7 @@ MODEL_PATH = "models/isolation_forest_model.joblib"
 def upload_and_analyze():
     st.markdown("## 📂 Upload Your Own Dataset for Anomaly Analysis")
     uploaded = st.file_uploader(
-        label="Upload a CSV with at least `timestamp` & `energy_kwh` columns",
+        label="Upload a CSV with at least `timestamp` & `energy_wh` columns",
         type="csv",
     )
     if not uploaded:
@@ -24,8 +24,8 @@ def upload_and_analyze():
         return
 
     # 2) Ensure required columns
-    if not {"timestamp", "energy_kwh"}.issubset(user_df.columns):
-        st.error("CSV must contain `timestamp` and `energy_kwh` columns.")
+    if not {"timestamp", "energy_wh"}.issubset(user_df.columns):
+        st.error("CSV must contain `timestamp` and `energy_wh` columns.")
         return
 
     # 3) Load model
@@ -36,7 +36,7 @@ def upload_and_analyze():
         return
 
     # 4) Predict anomalies
-    X = user_df[["energy_kwh"]]
+    X = user_df[["energy_wh"]]
     user_df["anomaly_flag"]  = if_model.predict(X) == -1
     user_df["anomaly_score"] = if_model.decision_function(X)
 
@@ -58,10 +58,10 @@ def upload_and_analyze():
 
     # 6) Time‑series chart
     st.subheader("Your Data: Energy & Anomalies")
-    fig = px.line(user_df, x="timestamp", y="energy_kwh", title="Uploaded Data")
+    fig = px.line(user_df, x="timestamp", y="energy_wh", title="Uploaded Data")
     fig.add_scatter(
         x=user_df.loc[user_df["anomaly_flag"], "timestamp"],
-        y=user_df.loc[user_df["anomaly_flag"], "energy_kwh"],
+        y=user_df.loc[user_df["anomaly_flag"], "energy_wh"],
         mode="markers",
         marker=dict(color="red", size=6),
         name="Anomaly"
@@ -72,7 +72,7 @@ def upload_and_analyze():
     st.subheader("Detailed Results")
     out = user_df.copy()
     out["Status"] = np.where(out["anomaly_flag"], "Anomaly", "Normal")
-    out = out[["timestamp", "energy_kwh", "Status", "anomaly_score"]]
+    out = out[["timestamp", "energy_wh", "Status", "anomaly_score"]]
     st.dataframe(out, use_container_width=True)
     st.download_button(
         "Download Your Anomaly Report",
