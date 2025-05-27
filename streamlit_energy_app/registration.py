@@ -37,10 +37,6 @@ def registration_page():
                 help="Residents can view their own data. Managers and Admins have additional privileges."
             )
             
-            # Terms and Conditions
-            st.markdown("<h3 style='text-align: center;'>Terms and Conditions</h3>", unsafe_allow_html=True)
-            agree = st.checkbox("I agree to the terms and conditions")
-            
             # Submit button
             submitted = st.form_submit_button("Create Account")
             
@@ -52,10 +48,6 @@ def registration_page():
                 
                 if password != confirm_password:
                     st.error("Passwords do not match.")
-                    return
-                
-                if not agree:
-                    st.error("Please agree to the terms and conditions.")
                     return
                 
                 # Check if username or email already exists
@@ -74,7 +66,13 @@ def registration_page():
                         "role": "resident",  # Always start as resident
                         "created_at": datetime.now(),
                         "status": "active",
-                        "disabled": False
+                        "disabled": False,
+                        "preferences": {
+                            "notifications": {
+                                "alerts": True,
+                                "reports": True
+                            }
+                        }
                     }
                     
                     # If requesting admin/manager role, set status to pending
@@ -141,7 +139,8 @@ def registration_page():
                         time.sleep(2)
                         
                         # Redirect to login page
-                        st.switch_page("pages/login.py")
+                        st.session_state.next_page = "Login"
+                        st.rerun()
                     else:
                         st.error("Failed to create account. Please try again.")
                     
