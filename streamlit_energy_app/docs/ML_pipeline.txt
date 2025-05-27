@@ -1,0 +1,18 @@
+@startuml
+!define RECTANGLE class
+
+RECTANGLE "IoT Sensors" as IoT
+RECTANGLE "Data Preprocessing\n(Cleaning, Normalization, aSAX)" as Preproc
+RECTANGLE "ML Models" as ML
+RECTANGLE "Anomaly Detection\n(Isolation Forest)" as IF
+RECTANGLE "Energy Forecasting\n(LSTM)" as LSTM
+RECTANGLE "Output\n(Alerts, Forecasts)" as Output
+RECTANGLE "HCI Module" as HCI
+
+IoT --> Preproc : Data (current, voltage, load)
+Preproc --> IF : Preprocessed Data
+Preproc --> LSTM : Preprocessed Data
+IF --> Output : Anomaly Labels
+LSTM --> Output : Forecasts
+Output --> HCI : Results (alerts, forecasts)
+@enduml

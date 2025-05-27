@@ -6,6 +6,21 @@ from email_utils import send_email
 from prophet import Prophet  # or your ARIMA code import
 import pickle
 
+def get_report_recipients():
+    """Get recipients based on their notification preferences"""
+    users = get_user_collection()
+    recipients = []
+    
+    for user in users.find({"role": {"$in": ["admin", "manager"]}}):
+        prefs = user.get("preferences", {})
+        notifications = prefs.get("notifications", {})
+        
+        # Check if user has enabled weekly report notifications
+        if notifications.get("reports", False):  # Default to False if not set
+            recipients.append(user["email"])
+    
+    return recipients
+
 def generate_weekly_report():
     db       = get_db()
     readings = pd.DataFrame(list(db["energy_readings"].find()))
@@ -76,10 +91,10 @@ Best regards,
 EMADS Automated Reporting System
     """
 
-    # 6) Send email
-    recipient_emails = [u["email"] for u in users.find(
-        {"role": {"$in": ["admin", "manager"]}},
-        {"email": 1, "_id": 0}
-    )]
-    send_email(recipient_emails, subject, body)
-    print("Weekly report sent to:", recipient_emails)
+    # 6) Send email based on user preferences
+    recipient_emails = get_report_recipients()
+    if recipient_emails:
+        send_email(recipient_emails, subject, body)
+        print("Weekly report sent to:", recipient_emails)
+    else:
+        print("No recipients opted in for weekly reports.")

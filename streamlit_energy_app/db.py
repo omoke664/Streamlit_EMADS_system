@@ -18,16 +18,17 @@ def get_user_collection():
     return get_db()[os.getenv("MONGO_USERS_COLLECTION", "users")]
 
 def get_alerts_collection():
-    return get_db()["MONGO_ALERTS_COLLECTION"]
+    return get_db()[os.getenv("MONGO_ALERTS_COLLECTION", "alerts")]
 
 def get_messages_collection():
-    return get_db()[os.getenv("MONGO_MESSAGES_COLLECTION","messages")]
+    return get_db()[os.getenv("MONGO_MESSAGES_COLLECTION", "messages")]
 
+def get_communications_collection():
+    return get_db()[os.getenv("MONGO_COMMUNICATIONS_COLLECTION", "communications")]
 
-
-
-
-
+def get_energy_collection():
+    """Get energy data collection"""
+    return get_db()[os.getenv("MONGO_ENERGY_COLLECTION", "energy_data")]
 
 @st.cache_data(ttl = 300)
 def load_energy_data():

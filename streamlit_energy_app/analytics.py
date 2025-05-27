@@ -9,7 +9,7 @@ from db import load_energy_data
 
 def analytics_page():
     require_login()
-    st.title("📊 Data Analytics")
+    st.title("Data Analytics")
 
     # 1) Load and filter data by date range
     df = load_energy_data()

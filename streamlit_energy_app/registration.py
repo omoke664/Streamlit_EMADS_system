@@ -1,54 +1,151 @@
 import streamlit as st
-import pandas as pd
-from db import get_user_collection
-from verify import hash_password 
-
-
-
+from db import get_user_collection, get_communications_collection
+from verify import hash_password
+from datetime import datetime
+import time
 
 def registration_page():
-    st.markdown("<center>Welcome To The Energy Monitoring and Anomaly Detection System.</center>", unsafe_allow_html=True)
-    st.write("🔒Register")
+    st.title("Registration")
+    st.markdown("""
+        Please fill out the form below to create your account.
+        All fields are required.
+    """)
+    
+    # Get collections
     users = get_user_collection()
+    communications = get_communications_collection()
 
-
-
-    with st.form("reg_form", clear_on_submit = True):
-        st.subheader("Create Account")
-        username = st.text_input("Username")
-        email = st.text_input("Email")
+    # Registration form
+    with st.form("registration_form", clear_on_submit=True):
+        # Personal Information
+        st.subheader("Personal Information")
         first_name = st.text_input("First Name")
         last_name = st.text_input("Last Name")
-        password = st.text_input("Password", type = "password")
-        requested = st.selectbox("Role", ["admin", "manager", "resident"])
+        email = st.text_input("Email")
+        
+        # Account Information
+        st.subheader("Account Information")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        confirm_password = st.text_input("Confirm Password", type="password")
+        
+        # Role Selection
+        st.subheader("Role Selection")
+        role = st.selectbox(
+            "Select your role",
+            ["resident", "manager", "admin"],
+            help="Residents can view their own data. Managers and Admins have additional privileges."
+        )
+        
+        # Terms and Conditions
+        st.subheader("Terms and Conditions")
+        agree = st.checkbox("I agree to the terms and conditions")
+        
+        # Submit button
         submitted = st.form_submit_button("Create Account")
+        
+        if submitted:
+            # Validate inputs
+            if not all([first_name, last_name, email, username, password, confirm_password]):
+                st.error("Please fill in all fields.")
+                return
+            
+            if password != confirm_password:
+                st.error("Passwords do not match.")
+                return
+            
+            if not agree:
+                st.error("Please agree to the terms and conditions.")
+                return
+            
+            # Check if username or email already exists
+            if users.find_one({"$or": [{"username": username}, {"email": email}]}):
+                st.error("Username or email already exists.")
+                return
+            
+            try:
+                # Create user document
+                user_doc = {
+                    "username": username,
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "password": hash_password(password),
+                    "role": "resident",  # Always start as resident
+                    "created_at": datetime.now(),
+                    "status": "active",
+                    "disabled": False
+                }
+                
+                # If requesting admin/manager role, set status to pending
+                if role in ["admin", "manager"]:
+                    user_doc["status"] = "pending"
+                    user_doc["requested_role"] = role
+                
+                # Insert user
+                result = users.insert_one(user_doc)
+                
+                if result.inserted_id:
+                    # Create welcome message
+                    welcome_message = {
+                        "username": username,
+                        "title": "Welcome to EMADS!",
+                        "message": f"""
+                        Welcome to the Energy Management and Anomaly Detection System (EMADS)!
 
-
-    if submitted:
-        if users.find_one({"username": username}):
-            st.error("❌ Username already exists. Log in instead.")
-        if not username or not email or not password:
-            st.error("❌ Please fill in all fields.")
-        elif users.find_one({"username":username}):
-            st.error("❌ Username already exists.")
-        elif users.find_one({"email":email}):
-            st.error("❌ An account with that email already exists.")
-        else:
-            users.insert_one({
-                "username": username,
-                "email": email,
-                "first_name": first_name,
-                "last_name": last_name,
-                "created_at": pd.Timestamp.now(),
-                "password": hash_password(password),
-                "role": "resident", # persitent role until approved
-                "requested_role": requested, # role requested by user
-                "approved": requested == "resident",
-            })
-            if requested == "resident":
-                st.success("✅ Account created!. You may now log in.")
-            else:
-                st.info("🕑 Your request for elevated access is pending admin approval.")
-
-            st.rerun()
+                        Your account has been created successfully.
+                        You can now log in to access the system.
+                        """,
+                        "type": "system_message",
+                        "timestamp": datetime.now(),
+                        "read": False
+                    }
+                    
+                    # Add role request notification if applicable
+                    if role in ["admin", "manager"]:
+                        welcome_message["message"] += f"""
+                        
+                        You have requested the role of {role}. Your request is pending approval.
+                        You will be notified once your request is reviewed.
+                        You can currently access the system as a resident.
+                        """
+                        
+                        # Notify existing admins and managers
+                        for admin in users.find({"role": {"$in": ["admin", "manager"]}}):
+                            notification = {
+                                "username": admin["username"],
+                                "title": "New Role Request",
+                                "message": f"""
+                                A new role request has been submitted:
+                                
+                                User: {first_name} {last_name} ({username})
+                                Requested Role: {role}
+                                Email: {email}
+                                
+                                Please review this request in the User Management section.
+                                """,
+                                "type": "role_request",
+                                "timestamp": datetime.now(),
+                                "read": False
+                            }
+                            communications.insert_one(notification)
+                    
+                    # Insert welcome message
+                    communications.insert_one(welcome_message)
+                    
+                    # Show success message
+                    st.success("Account created successfully!")
+                    st.info("Please wait while we redirect you to the login page...")
+                    
+                    # Wait a moment to show the success message
+                    time.sleep(2)
+                    
+                    # Redirect to login page
+                    st.switch_page("pages/login.py")
+                else:
+                    st.error("Failed to create account. Please try again.")
+                    
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+                return
 

@@ -1,0 +1,24 @@
+@startuml
+actor "ML Engineer" as Engineer
+actor "Facility Manager" as Manager
+actor "User/Resident" as User
+
+rectangle "EMADS System" {
+  usecase "Data Ingestion" as UC1
+  usecase "Anomaly Detection" as UC2
+  usecase "Energy Forecasting" as UC3
+  usecase "Output/Report Generation" as UC4
+}
+
+Engineer --> UC1
+Engineer --> UC2
+Engineer --> UC3
+Engineer --> UC4
+
+Manager --> UC2
+Manager --> UC3
+Manager --> UC4
+
+User --> UC3
+User --> UC4
+@enduml

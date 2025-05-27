@@ -1,0 +1,6 @@
+reloading and logging out ----cookies
+forgot password
+messages to be sent by system on alerts
+when sending email, include link to log in to app
+navigation, go to -remove name and photo
+recommendations -visualization

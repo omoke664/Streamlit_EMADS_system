@@ -11,8 +11,12 @@ python-dotenv
 sqlalchemy 
 pymongo
 passlib[bcrypt]
-prophet 
-cmdstanpy 
-itsdangerous 
+torch
+torchvision
+prophet
+cmdstanpy
+joblib
+itsdangerous
+
 
 

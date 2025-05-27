@@ -3,8 +3,13 @@ import streamlit as st
 
 
 def about_page():
-    st.title("ℹ️ About EMADS")
+    st.title("About EMADS")
     
+    st.markdown("""
+        EMADS (Energy Monitoring & Anomaly Detection System) is a comprehensive platform
+        for monitoring energy consumption and detecting anomalies in real-time.
+    """)
+
     st.markdown(
         """
         **Energy Monitoring & Anomaly Detection System (EMADS)**  

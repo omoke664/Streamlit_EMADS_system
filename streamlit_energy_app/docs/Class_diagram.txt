@@ -1,0 +1,37 @@
+@startuml
+class DataLoader {
+  +load_csv()
+  +load_json()
+  +load_api()
+}
+
+class TimeSeriesPreprocessor {
+  +clean_data()
+  +normalize()
+  +feature_engineer()
+  +apply_aSAX()
+}
+
+class AnomalyDetector {
+  +train_isolation_forest()
+  +detect_anomalies()
+}
+
+class EnergyForecaster {
+  +train_LSTM()
+  +predict()
+}
+
+class OutputGenerator {
+  +export_csv()
+  +export_json()
+  +send_to_HCI()
+}
+
+DataLoader --> TimeSeriesPreprocessor : provides data
+TimeSeriesPreprocessor --> AnomalyDetector : preprocessed data
+TimeSeriesPreprocessor --> EnergyForecaster : preprocessed data
+AnomalyDetector --> OutputGenerator : anomaly results
+EnergyForecaster --> OutputGenerator : forecast results
+OutputGenerator --> "HCI Module" : outputs
+@enduml
