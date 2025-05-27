@@ -8,24 +8,27 @@ from datetime import datetime
 
 def login_page():
     # Welcome message
-    st.markdown("Welcome Back to EMADS")
-    st.markdown("Your Energy Monitoring & Anomaly Detection System")
-    st.markdown("Please Log In to Continue")
+    st.markdown("<h1 style='text-align: center;'>Welcome Back to EMADS</h1>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Your Energy Monitoring & Anomaly Detection System</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Please Log In to Continue</p>", unsafe_allow_html=True)
 
-    # Login form
-    with st.form("login_form", clear_on_submit=True):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Login")
+    # Create a centered container for the form
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        # Login form
+        with st.form("login_form", clear_on_submit=True):
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            submitted = st.form_submit_button("Login")
 
-    # Navigation links
-    if st.button("Forgot Password?", key="forgot_password"):
-        st.session_state.next_page = "Forgot Password"
-        st.rerun()
-    
-    if st.button("Register"):
-        st.session_state.next_page = "Registration"
-        st.rerun()
+        # Navigation links
+        if st.button("Forgot Password?", key="forgot_password"):
+            st.session_state.next_page = "Forgot Password"
+            st.rerun()
+        
+        if st.button("Register"):
+            st.session_state.next_page = "Registration"
+            st.rerun()
 
     if submitted:
         if not username or not password:

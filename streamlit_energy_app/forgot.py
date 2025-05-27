@@ -17,18 +17,21 @@ logger = logging.getLogger(__name__)
 
 def forgot_password_page():
     # Welcome message
-    st.markdown("Forgot Password")
-    st.markdown("Enter your email address to reset your password")
+    st.markdown("<h1 style='text-align: center;'>Forgot Password</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Enter your email address to reset your password</p>", unsafe_allow_html=True)
 
-    # Reset password form
-    with st.form("forgot_password_form", clear_on_submit=True):
-        email = st.text_input("Email")
-        submitted = st.form_submit_button("Send Reset Link")
+    # Create a centered container for the form
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        # Reset password form
+        with st.form("forgot_password_form", clear_on_submit=True):
+            email = st.text_input("Email")
+            submitted = st.form_submit_button("Send Reset Link")
 
-    # Navigation links
-    if st.button("Back to Login"):
-        st.session_state.next_page = "Login"
-        st.rerun()
+        # Navigation links
+        if st.button("Back to Login"):
+            st.session_state.next_page = "Login"
+            st.rerun()
 
     if submitted:
         if not email:
