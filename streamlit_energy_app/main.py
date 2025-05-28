@@ -57,7 +57,7 @@ from anomalies import anomalies_page
 from analytics import analytics_page 
 from reports import reports_page 
 from upload import upload_and_analyze
-from preferences import preferences_page 
+from preferences import preferences_page
 from communications import communications_page 
 from recommendations import recommendations_page
 from lstm_network import lstm_network_page
@@ -75,9 +75,7 @@ if 'username' not in st.session_state:
 if 'role' not in st.session_state:
     st.session_state.role = None
 if 'page' not in st.session_state:
-    st.session_state.page = 'login'
-if 'next_page' not in st.session_state:
-    st.session_state.next_page = None
+    st.session_state.page = 'Login'
 if 'user' not in st.session_state:
     st.session_state.user = None
 
@@ -95,20 +93,11 @@ def main():
         reset_password_page()
         return
 
-    # Handle navigation based on session state
-    if st.session_state.next_page:
-        page = st.session_state.next_page
-        st.session_state.next_page = None
-        if page == "Login":
-            login_page()
-        elif page == "Registration":
-            registration_page()
-        elif page == "Forgot Password":
-            forgot_password_page()
-        return
-
     if not st.session_state.user:
+        # Not logged in: show login menu
         choice = st.sidebar.radio("Go to", ["Login", "Register", "Forgot Password"])
+        st.session_state.page = choice
+        
         if choice == "Login":
             login_page()
         elif choice == "Register":
@@ -119,9 +108,9 @@ def main():
     else:
         # Logged in: show role-based menu
         role = st.session_state.user["role"]
-        pages = ["Dashboard", "Reports", "Analytics", "Recommendations", "Preferences", "About"]
+        pages = ["Dashboard", "Reports", "Analytics","Anomalies", "LSTM Network", "Prophet Forecast", "Recommendations", "Preferences", "About"]
         if role in ("admin", "manager"):
-            pages += ["Anomalies", "LSTM Network", "Prophet Forecast", "Upload Dataset", "Alerts", "User Management", "Communications"]
+            pages += [ "Upload Dataset", "Alerts", "User Management", "Communications"]
         selection = st.sidebar.radio("Go to", pages)
         st.sidebar.button("Logout", on_click = logout)
 

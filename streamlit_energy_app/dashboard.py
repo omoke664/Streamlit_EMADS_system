@@ -82,45 +82,9 @@ def dashboard_page():
     avg_wh = df["energy_wh"].mean()
     peak_wh = df["energy_wh"].max()
 
-    # Calculate anomaly rate using the same method as anomalies page
-    try:
-        model_path = "new_models/IF_model.joblib"
-        model = joblib.load(model_path)
-        # Get anomaly scores
-        scores = model.decision_function(df[['energy_wh']].values)
-        
-        # Calculate thresholds based on score distribution
-        high_threshold = np.percentile(scores, 0.5)    # Top 0.5% most anomalous
-        medium_threshold = np.percentile(scores, 1.0)  # Top 1% most anomalous
-        low_threshold = np.percentile(scores, 2.0)     # Top 2% most anomalous
-        
-        # Categorize anomalies
-        df['anomaly_score'] = scores
-        df['anomaly'] = model.predict(df[['energy_wh']].values)
-        
-        # Add severity levels
-        df['severity'] = 'normal'
-        df.loc[df['anomaly_score'] <= high_threshold, 'severity'] = 'high'
-        df.loc[(df['anomaly_score'] > high_threshold) & 
-               (df['anomaly_score'] <= medium_threshold), 'severity'] = 'medium'
-        df.loc[(df['anomaly_score'] > medium_threshold) & 
-               (df['anomaly_score'] <= low_threshold), 'severity'] = 'low'
-        
-        # Additional filtering to ensure anomalies are significant
-        df['z_score'] = (df['energy_wh'] - df['energy_wh'].mean()) / df['energy_wh'].std()
-        df.loc[abs(df['z_score']) < 2.0, 'anomaly'] = 1
-        df.loc[abs(df['z_score']) < 2.0, 'severity'] = 'normal'
-        
-        # Calculate anomaly rate
-        total_anomalies = len(df[df['severity'].isin(['high', 'medium', 'low'])])
-        anomaly_rate = (total_anomalies / len(df)) * 100 if len(df) > 0 else 0
-    except Exception as e:
-        st.warning(f"Could not calculate anomaly rate: {str(e)}")
-        anomaly_rate = 0.0
-
     # Display KPI cards
     st.markdown("### Key Performance Indicators")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric(
@@ -139,12 +103,6 @@ def dashboard_page():
             "Peak Energy",
             f"{peak_wh:,.1f} Wh",
             delta=f"{(peak_wh - df['energy_wh'].max()):,.1f} Wh"
-        )
-    with col4:
-        st.metric(
-            "Anomaly Rate",
-            f"{anomaly_rate:.2f}%",
-            delta=None
         )
 
     # Main time series plot

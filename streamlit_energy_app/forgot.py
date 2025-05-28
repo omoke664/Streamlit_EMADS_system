@@ -28,10 +28,13 @@ def forgot_password_page():
             email = st.text_input("Email")
             submitted = st.form_submit_button("Send Reset Link")
 
-        # Navigation links
-        if st.button("Back to Login"):
-            st.session_state.next_page = "Login"
-            st.rerun()
+        # Navigation guidance
+        st.markdown("""
+        <div style='text-align: center; margin-top: 20px; color: #666;'>
+            <p>Remember your password? Use the sidebar navigation to <strong>Login</strong>.</p>
+            <p>Don't have an account? Use the sidebar navigation to <strong>Register</strong>.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     if submitted:
         if not email:

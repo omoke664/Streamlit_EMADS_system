@@ -20,15 +20,14 @@ def login_page():
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
             submitted = st.form_submit_button("Login")
-
-        # Navigation links
-        if st.button("Forgot Password?", key="forgot_password"):
-            st.session_state.next_page = "Forgot Password"
-            st.rerun()
         
-        if st.button("Register"):
-            st.session_state.next_page = "Registration"
-            st.rerun()
+        # Navigation guidance
+        st.markdown("""
+        <div style='text-align: center; margin-top: 20px; color: #666;'>
+            <p>Don't have an account? Use the sidebar navigation to <strong>Register</strong>.</p>
+            <p>Forgot your password? Use the sidebar navigation to <strong>Reset Password</strong>.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     if submitted:
         if not username or not password:
