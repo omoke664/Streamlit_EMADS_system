@@ -27,19 +27,17 @@ A comprehensive Streamlit-based web application designed to monitor energy consu
 
 
 2. Install the required dependencies:
-
    ```bash
    pip install -r requirements.txt
 
-3. Configure environment variables:
 
+3. Configure environment variables:
 Create a .env file in the root directory and add any necessary database credentials, API keys, or email configurations required by db.py and email_utils.py.
 
 Usage
 Run the Streamlit application locally:
    ```bash
    streamlit run main.py
-
 
 # Energy Monitoring and Anomaly Detection System (EMADS)
 
