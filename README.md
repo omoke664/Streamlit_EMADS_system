@@ -28,8 +28,8 @@ A comprehensive Streamlit-based web application designed to monitor energy consu
 
 2. Install the required dependencies:
 
-Bash
-pip install -r requirements.txt
+   ```bash
+   pip install -r requirements.txt
 
 3. Configure environment variables:
 
@@ -37,8 +37,10 @@ Create a .env file in the root directory and add any necessary database credenti
 
 Usage
 Run the Streamlit application locally:
+   ```bash
+   streamlit run main.py
 
-Markdown
+
 # Energy Monitoring and Anomaly Detection System (EMADS)
 
 A comprehensive Streamlit-based web application designed to monitor energy consumption, detect usage anomalies, and forecast future energy demands for university hostels. The system integrates hardware sensor data with advanced machine learning models to provide real-time insights and automated reporting.
@@ -65,26 +67,30 @@ A comprehensive Streamlit-based web application designed to monitor energy consu
    ```bash
    git clone [https://github.com/omoke664/Streamlit_EMADS_system.git](https://github.com/omoke664/Streamlit_EMADS_system.git)
    cd Streamlit_EMADS_system/streamlit_energy_app
-Install the required dependencies:
 
-Bash
-pip install -r requirements.txt
-Configure environment variables:
+2. Install the required dependencies:
 
-Create a .env file in the root directory and add any necessary database credentials, API keys, or email configurations required by db.py and email_utils.py.
+   ```bash
+   pip install -r requirements.txt
+
+
+3. Configure environment variables:
+
+* Create a .env file in the root directory and add any necessary database credentials, API keys, or email configurations required by db.py and email_utils.py.
 
 Usage
-Run the Streamlit application locally:
+* Run the Streamlit application locally:
 
-Bash
-streamlit run main.py
-Navigate to http://localhost:8501 in your web browser to access the login page and dashboard.
+   ```bash
+   streamlit run main.py
 
-Project Structure Highlights
-anomaly_detection/ & new_models/: Contains the trained machine learning models for processing sensor data.
+* Navigate to http://localhost:8501 in your web browser to access the login page and dashboard.
 
-utils/: Helper functions for data processing and formatting.
+## Project Structure Highlights
+* anomaly_detection/ & new_models/: Contains the trained machine learning models for processing sensor data.
 
-assets/: Image assets and static files for the frontend UI.
+* utils/: Helper functions for data processing and formatting.
 
-run_weekly_report.bat: Batch script for automating the generation of weekly energy consumption reports.
+* assets/: Image assets and static files for the frontend UI.
+
+* run_weekly_report.bat: Batch script for automating the generation of weekly energy consumption reports.
